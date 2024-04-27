@@ -7,6 +7,8 @@ enum FToastPosition { top, bottom, center, topLeft, topRight, bottomLeft, bottom
 
 enum FToastType { all, warning, fail }
 
+enum FToastDuration { short, medium, long }
+
 /// Signature for a function to buildCustom Toast
 typedef PositionedToastBuilder = Widget Function(BuildContext context, Widget child);
 
@@ -39,9 +41,9 @@ class FToast {
     required bool responseStatus,
     required FToastType type,
     PositionedToastBuilder? positionedToastBuilder,
-    Duration toastDuration = const Duration(milliseconds: 1500),
+    FToastDuration toastDuration = FToastDuration.short,
     FToastPosition? position,
-    Duration fadeDuration = const Duration(milliseconds: 200),
+    Duration fadeDuration = const Duration(milliseconds: 250),
     bool ignorePointer = false,
     bool isDismissable = true,
   }) {
@@ -61,7 +63,17 @@ class FToast {
       fToast: this,
       position: position ?? FToastPosition.bottom,
     );
-    Widget newChild = _ToastStateFul(theWidget, toastDuration, fadeDuration, ignorePointer, !isDismissable ? null : () => removeCustomToast());
+    late Duration toastDurationSeconds;
+
+    if (toastDuration == FToastDuration.short) {
+      toastDurationSeconds = const Duration(milliseconds: 2000);
+    } else if (toastDuration == FToastDuration.medium) {
+      toastDurationSeconds = const Duration(milliseconds: 4000);
+    } else if (toastDuration == FToastDuration.long) {
+      toastDurationSeconds = const Duration(milliseconds: 6000);
+    }
+
+    Widget newChild = _ToastStateFul(theWidget, toastDurationSeconds, fadeDuration, ignorePointer, !isDismissable ? null : () => removeCustomToast());
     if (position == FToastPosition.bottom) {
       if (MediaQuery.of(context!).viewInsets.bottom != 0) {
         position = FToastPosition.center;
@@ -73,7 +85,7 @@ class FToast {
       return _getPostionWidgetBasedOnPosition(newChild, position);
     });
 
-    _overlayQueue.add(_ToastEntry(entry: newEntry, duration: toastDuration, fadeDuration: fadeDuration));
+    _overlayQueue.add(_ToastEntry(entry: newEntry, duration: toastDurationSeconds, fadeDuration: fadeDuration));
 
     if (_timer == null) {
       _showOverlay();
