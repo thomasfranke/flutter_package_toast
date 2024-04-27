@@ -61,23 +61,19 @@ class FToast {
       fToast: this,
       position: position ?? FToastPosition.bottom,
     );
-    log('ae1');
     Widget newChild = _ToastStateFul(theWidget, toastDuration, fadeDuration, ignorePointer, !isDismissable ? null : () => removeCustomToast());
     if (position == FToastPosition.bottom) {
       if (MediaQuery.of(context!).viewInsets.bottom != 0) {
         position = FToastPosition.center;
       }
     }
-    log('ae2');
 
     OverlayEntry newEntry = OverlayEntry(builder: (context) {
       if (positionedToastBuilder != null) return positionedToastBuilder(context, newChild);
       return _getPostionWidgetBasedOnPosition(newChild, position);
     });
-    log('ae3');
 
     _overlayQueue.add(_ToastEntry(entry: newEntry, duration: toastDuration, fadeDuration: fadeDuration));
-    log('ae4');
 
     if (_timer == null) {
       _showOverlay();
